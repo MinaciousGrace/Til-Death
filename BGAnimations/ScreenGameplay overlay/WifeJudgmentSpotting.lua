@@ -144,6 +144,16 @@ d = Def.ActorFrame{
 			end
 			settext(self,tDiff)
 		end
+	},
+	LoadFont("Common Large")..{											
+		Name = "DisplayPercent",
+		InitCommand=cmd(xy,SCREEN_CENTER_X-160,SCREEN_CENTER_Y+180;zoom,0.4;halign,0;valign,1),
+		OnCommand=function(self)
+			self:settextf("%05.2f%%", 0)
+		end,
+		JudgmentMessageCommand=function(self,msg)
+			self:settextf("%05.2f%%", msg.WifePercent)
+		end
 	}
 }
 
