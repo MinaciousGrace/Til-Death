@@ -170,6 +170,34 @@ function GhostTarget()
 	return t
 end
 
+function JudgmentText()
+	local t = {
+		Name = "JudgmentText";
+		LayoutType = "ShowAllInRow";
+		SelectType = "SelectOne";
+		OneChoiceForAllPlayers = false;
+		ExportOnChange = true;
+		Choices = { THEME:GetString('OptionNames','Hide'),'Show'};
+		LoadSelections = function(self, list, pn)
+			local pref = playerConfig:get_data(pn_to_profile_slot(pn)).JudgmentText
+			if pref then
+				list[2] = true;
+			else
+				list[1] = true;
+			end;
+		end;
+		SaveSelections = function(self, list, pn)
+			local value
+			value = list[2]
+			playerConfig:get_data(pn_to_profile_slot(pn)).JudgmentText = value
+			playerConfig:set_dirty(pn_to_profile_slot(pn))
+			playerConfig:save(pn_to_profile_slot(pn))
+		end;
+	};
+	setmetatable( t, t );
+	return t;
+end	
+
 function TargetTracker()
 	local t = {
 		Name = "TargetTracker";

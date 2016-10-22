@@ -235,6 +235,9 @@ function calcPlayerScore(score, scoreType)
 	s.Points.maxHoldPoints = st.HoldNoteScore_Held * getMaxHolds(PLAYER_1)
 	s.Points.maxTotalPoints = s.Points.maxTapPoints + s.Points.maxHoldPoints
 	s.Percent = notShit.round(s.Points.playerTotalPoints/s.Points.maxTotalPoints*100, 2)
+	if scoreType == 4 then
+		s.Percent = wifescorepercentstraightfromthegameclient
+	end
 	return s
 end
 

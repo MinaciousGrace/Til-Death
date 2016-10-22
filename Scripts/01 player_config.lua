@@ -16,6 +16,7 @@ local defaultConfig = {
 	NPSGraph = false,
 	CBHighlight = false,
 	OneShotMirror = false,
+	JudgmentText = true,
 }
 
 playerConfig = create_setting("playerConfig", "playerConfig.lua", defaultConfig, -1)

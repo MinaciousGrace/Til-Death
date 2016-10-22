@@ -49,6 +49,7 @@ local queuecommand = Actor.queuecommand
 local playcommand = Actor.queuecommand
 local settext = BitmapText.settext
 local Broadcast = MessageManager.Broadcast
+wifescorepercentstraightfromthegameclient = 0
 -- ugh, for preventing song search from sending you back to a search result if you scroll somewhere else, enter, and then quit
 storeSongSearchResult(GAMESTATE:GetCurrentSong(), GAMESTATE:GetCurrentSteps(PLAYER_1))
 
@@ -66,10 +67,11 @@ local t = Def.ActorFrame{
 	JudgmentMessageCommand=function(self, msg)
 		if msg.Offset ~= nil then
 			dvCur = msg.Offset 
-			jdgCur = msg.Judgment			
+			jdgCur = msg.Judgment
 			Broadcast(MESSAGEMAN, "SpottedOffset")
 			dvT[#dvT+1]	= dvCur
 			nrT[#nrT+1]	= msg.NoteRow
+			wifescorepercentstraightfromthegameclient = msg.WifePercent
 		end
 	end
 }										
@@ -98,42 +100,42 @@ t[#t+1] = LoadActor("lanecover")
 	Point differential to AA.
 ]]
 
-local pGain = 0								-- Points the player has obtained
-local pMax = 0								-- Points the player could have obtained
-local maxP = {								-- Table of maximum points for each judgment type
-	Tap = sT["TapNoteScore_W1"],
-	Hold = sT["HoldNoteScore_Held"],
-	Mine = sT["TapNoteScore_AvoidMine"]
-}
+-- Doing this all in the client now
+--local pGain = 0								-- Points the player has obtained
+--local pMax = 0								-- Points the player could have obtained
+--local maxP = {								-- Table of maximum points for each judgment type
+--	Tap = sT["TapNoteScore_W1"],
+--	Hold = sT["HoldNoteScore_Held"],
+--	Mine = sT["TapNoteScore_AvoidMine"]
+--}
 
-local tDiff									-- Player's point differential from the target goal
+--local tDiff									-- Player's point differential from the target goal
 
 -- Need to check this later to make sure it's efficient and accurate 
 d = Def.ActorFrame{
-	Name = "AA Differential Calculator",
-	Def.Actor{																
-		JudgmentMessageCommand=function(self,msg)
-			pMax = pMax + maxP[msg.Type]
-			if not msg.Offset then
-				pGain = pGain + sT[msg.Judgment]
-				Broadcast(MESSAGEMAN, "RecalcDifferential")
-			end
-		end																			
-	},
-	Def.Actor{
-		Name = "OffsetPointsAccountant",
-		SpottedOffsetMessageCommand=cmd(queuecommand, "Set"),
-		SetCommand=function(self)
-			pGain = pGain + pT[Abs(Floor(dvCur+0.5))]
-			Broadcast(MESSAGEMAN, "RecalcDifferential")
-		end
-	},
+	-- Name = "AA Differential Calculator",
+	-- Def.Actor{																
+		-- JudgmentMessageCommand=function(self,msg)
+			-- pMax = pMax + maxP[msg.Type]
+			-- if not msg.Offset then
+				-- pGain = pGain + sT[msg.Judgment]
+				-- Broadcast(MESSAGEMAN, "RecalcDifferential")
+			-- end
+		-- end																			
+	-- },
+	-- Def.Actor{
+		-- Name = "OffsetPointsAccountant",
+		-- SpottedOffsetMessageCommand=cmd(queuecommand, "Set"),
+		-- SetCommand=function(self)
+			-- pGain = pGain + pT[Abs(Floor(dvCur+0.5))]
+			-- Broadcast(MESSAGEMAN, "RecalcDifferential")
+		-- end
+	-- },
 	LoadFont("Common Normal")..{											
 		Name = "Display",
 		InitCommand=cmd(xy,SCREEN_CENTER_X+26,SCREEN_CENTER_Y+30;zoom,0.4;halign,0;valign,1),
-		RecalcDifferentialMessageCommand=cmd(queuecommand,"Set"),
-		SetCommand=function(self)
-			tDiff = Round(pGain - 0.93*pMax, 2)
+		JudgmentMessageCommand=function(self,msg)
+			tDiff = Round(msg.WifeDifferential, 2)
 			if tDiff >= 0 then 											
 				tDiff = "+"..tDiff
 				diffuse(self,positive)

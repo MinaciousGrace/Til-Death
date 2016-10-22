@@ -45,4 +45,7 @@ local t = Def.ActorFrame {
 	end
 }
 
-return t
+if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).JudgmentText then
+	return t
+end
+
