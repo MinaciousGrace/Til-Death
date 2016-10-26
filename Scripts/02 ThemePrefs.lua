@@ -40,6 +40,42 @@ function OptionRowScreenFilter()
 	}
 end
 
+local RSChoices = {};
+for i=1,250  do
+RSChoices[i] = tostring(i)..'%';
+end;
+function ReceptorSize()
+	local t = {
+		Name = "ReceptorSize";
+		LayoutType = "ShowAllInRow";
+		SelectType = "SelectOne";
+		OneChoiceForAllPlayers = false;
+		ExportOnChange = true;
+		Choices = RSChoices;
+		LoadSelections = function(self, list, pn)
+			local prefs = playerConfig:get_data(pn_to_profile_slot(pn)).ReceptorSize
+			list[prefs] = true;
+		end;
+		SaveSelections = function(self, list, pn)
+			local found = false
+			for i=1,#list do
+				if not found then
+					if list[i] == true then
+						local value = i;
+						playerConfig:get_data(pn_to_profile_slot(pn)).ReceptorSize = value
+						found = true
+					end
+				end
+			end
+			playerConfig:set_dirty(pn_to_profile_slot(pn))
+			playerConfig:save(pn_to_profile_slot(pn))
+		end
+	}
+	setmetatable( t, t )
+	return t
+end
+
+
 function JudgeType()
 	local t = {
 		Name = "JudgeType";
@@ -101,39 +137,6 @@ function AvgScoreType()
 	setmetatable( t, t );
 	return t;
 end;
-
-function GhostScoreType()
-	local t = {
-		Name = "GhostScoreType";
-		LayoutType = "ShowAllInRow";
-		SelectType = "SelectOne";
-		OneChoiceForAllPlayers = false;
-		ExportOnChange = true;
-		Choices = { THEME:GetString('OptionNames','Off'),'DP','%Score','MIGS' };
-		LoadSelections = function(self, list, pn)
-			local prefs = playerConfig:get_data(pn_to_profile_slot(pn)).GhostScoreType
-			list[prefs+1] = true
-		end;
-		SaveSelections = function(self, list, pn)
-			local value
-			if list[4] then
-				value = 3;
-			elseif list[3] then
-				value = 2;
-			elseif list[2] then
-				value = 1;
-			else
-				value = 0;
-			end;
-			playerConfig:get_data(pn_to_profile_slot(pn)).GhostScoreType = value
-			playerConfig:set_dirty(pn_to_profile_slot(pn))
-			playerConfig:save(pn_to_profile_slot(pn))
-		end;
-	};
-	setmetatable( t, t );
-	return t;
-end;
-
 
 local tChoices = {};
 for i=1,100  do

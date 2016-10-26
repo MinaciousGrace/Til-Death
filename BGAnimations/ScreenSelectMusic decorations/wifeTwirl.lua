@@ -9,6 +9,12 @@ if not isJudgeSame() then
 end
 
 
+if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).OneShotMirror then
+	local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
+	local playeroptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions(modslevel)
+	playeroptions:Mirror( false )
+end
+
 local frameX = 10
 local frameY = 250+capWideScale(get43size(120),120)
 local frameWidth = capWideScale(get43size(455),455)

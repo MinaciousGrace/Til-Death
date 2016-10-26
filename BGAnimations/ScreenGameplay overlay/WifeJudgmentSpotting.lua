@@ -1,16 +1,15 @@
 --[[ 
-
 	Basically rewriting the c++ code to not be total shit so this can also not be total shit.
 ]]
 	
 local jcKeys = tableKeys(colorConfig:get_data().judgment)
-local jcT = {}										--  A "T" following a variable name will designate an object of type table.
+local jcT = {}										-- A "T" following a variable name will designate an object of type table.
 
 for i=1, #jcKeys do
 	jcT[jcKeys[i]] = byJudgment(jcKeys[i])
 end
 
-local jdgT = {										-- table of judgments for the judgecounter 
+local jdgT = {										-- Table of judgments for the judgecounter 
 	"TapNoteScore_W1",
 	"TapNoteScore_W2",
 	"TapNoteScore_W3",
@@ -49,10 +48,16 @@ local queuecommand = Actor.queuecommand
 local playcommand = Actor.queuecommand
 local settext = BitmapText.settext
 local Broadcast = MessageManager.Broadcast
-wifescorepercentstraightfromthegameclient = 0
+local wifescorepercentstraightfromthegameclient = 0
+dafinalscoreYO = 0
+
 -- ugh, for preventing song search from sending you back to a search result if you scroll somewhere else, enter, and then quit
 storeSongSearchResult(GAMESTATE:GetCurrentSong(), GAMESTATE:GetCurrentSteps(PLAYER_1))
 
+-- temporary measure so mini option aka receptor size selection saves
+local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
+local playeroptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions(modslevel)
+playeroptions:Mini( 2 - playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).ReceptorSize/50 )
 
 
 --[[~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,6 +77,7 @@ local t = Def.ActorFrame{
 			dvT[#dvT+1]	= dvCur
 			nrT[#nrT+1]	= msg.NoteRow
 			wifescorepercentstraightfromthegameclient = msg.WifePercent
+			dafinalscoreYO = msg.TotalPercent
 		end
 	end
 }										
@@ -100,37 +106,8 @@ t[#t+1] = LoadActor("lanecover")
 	Point differential to AA.
 ]]
 
--- Doing this all in the client now
---local pGain = 0								-- Points the player has obtained
---local pMax = 0								-- Points the player could have obtained
---local maxP = {								-- Table of maximum points for each judgment type
---	Tap = sT["TapNoteScore_W1"],
---	Hold = sT["HoldNoteScore_Held"],
---	Mine = sT["TapNoteScore_AvoidMine"]
---}
-
---local tDiff									-- Player's point differential from the target goal
-
--- Need to check this later to make sure it's efficient and accurate 
+-- Clientside now
 d = Def.ActorFrame{
-	-- Name = "AA Differential Calculator",
-	-- Def.Actor{																
-		-- JudgmentMessageCommand=function(self,msg)
-			-- pMax = pMax + maxP[msg.Type]
-			-- if not msg.Offset then
-				-- pGain = pGain + sT[msg.Judgment]
-				-- Broadcast(MESSAGEMAN, "RecalcDifferential")
-			-- end
-		-- end																			
-	-- },
-	-- Def.Actor{
-		-- Name = "OffsetPointsAccountant",
-		-- SpottedOffsetMessageCommand=cmd(queuecommand, "Set"),
-		-- SetCommand=function(self)
-			-- pGain = pGain + pT[Abs(Floor(dvCur+0.5))]
-			-- Broadcast(MESSAGEMAN, "RecalcDifferential")
-		-- end
-	-- },
 	LoadFont("Common Normal")..{											
 		Name = "Display",
 		InitCommand=cmd(xy,SCREEN_CENTER_X+26,SCREEN_CENTER_Y+30;zoom,0.4;halign,0;valign,1),
@@ -196,7 +173,7 @@ local j = Def.ActorFrame{
 	end																		
 }																					
 
- local function makeJudgeText(judge,index)			-- Makes text
+ local function makeJudgeText(judge,index)		-- Makes text
  	return LoadFont("Common normal")..{
  		InitCommand=cmd(xy,frameX+5,frameY+7+(index*spacing);zoom,judgeFontSize;halign,0),
  		OnCommand=function(self)

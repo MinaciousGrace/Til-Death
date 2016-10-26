@@ -17,6 +17,7 @@ local defaultConfig = {
 	CBHighlight = false,
 	OneShotMirror = false,
 	JudgmentText = true,
+	ReceptorSize = 100,
 }
 
 playerConfig = create_setting("playerConfig", "playerConfig.lua", defaultConfig, -1)

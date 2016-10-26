@@ -236,7 +236,7 @@ function calcPlayerScore(score, scoreType)
 	s.Points.maxTotalPoints = s.Points.maxTapPoints + s.Points.maxHoldPoints
 	s.Percent = notShit.round(s.Points.playerTotalPoints/s.Points.maxTotalPoints*100, 2)
 	if scoreType == 4 then
-		s.Percent = wifescorepercentstraightfromthegameclient
+		s.Percent = dafinalscoreYO
 	end
 	return s
 end
