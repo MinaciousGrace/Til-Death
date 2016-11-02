@@ -22,10 +22,10 @@ local jdgT = {										-- Table of judgments for the judgecounter
 
 
 
-devianceTable = {}															-- Not really caring about global namespace pollution at the moment
-NoteRowTable = {}		
-local nrT = NoteRowTable													-- This is for storing the note row the judgment was made on
-local dvT = devianceTable													-- But we'll make a local reference for a slight speed increase
+devianceTable = nil															-- Not really caring about global namespace pollution at the moment
+NoteRowTable = nil	
+local dvT = {}																-- But we'll make a local reference for a slight speed increase during gameplay
+local nrT = {}																-- This is for storing the note row the judgment was made on
 local sT = scoringTypes[themeConfig:get_data().global.DefaultScoreType]			
 local pT = sT.PointTable																														
 local dvCur																	
@@ -33,9 +33,9 @@ local jdgCur																-- Note: only for judgments with OFFSETS, might reor
 local positive = getMainColor("positive")
 local highlight = getMainColor("highlight")
 local negative = getMainColor('negative')
+local wifetotalpercent = 0
 
 -- We can also pull in some localized aliases for workhorse functions for a modest speed increase
-
 local Abs = math.abs
 local Floor = math.floor
 local Round = notShit.round
@@ -48,8 +48,6 @@ local queuecommand = Actor.queuecommand
 local playcommand = Actor.queuecommand
 local settext = BitmapText.settext
 local Broadcast = MessageManager.Broadcast
-local wifescorepercentstraightfromthegameclient = 0
-dafinalscoreYO = 0
 
 -- ugh, for preventing song search from sending you back to a search result if you scroll somewhere else, enter, and then quit
 storeSongSearchResult(GAMESTATE:GetCurrentSong(), GAMESTATE:GetCurrentSteps(PLAYER_1))
@@ -76,12 +74,15 @@ local t = Def.ActorFrame{
 			Broadcast(MESSAGEMAN, "SpottedOffset")
 			dvT[#dvT+1]	= dvCur
 			nrT[#nrT+1]	= msg.NoteRow
-			wifescorepercentstraightfromthegameclient = msg.WifePercent
-			dafinalscoreYO = msg.TotalPercent
 		end
+	end,
+	SongFinishedMessageCommand=function()
+		dafinalscoreYO = wifetotalpercent
+		devianceTable = dvT
+		NoteRowTable = nrT
 	end
-}										
-	
+}
+
 -- Stuff you probably shouldn't turn off, music rate string display
 t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,SCREEN_CENTER_X,SCREEN_BOTTOM-10;zoom,0.35;settext,getCurRateDisplayString())}
 
@@ -106,20 +107,20 @@ t[#t+1] = LoadActor("lanecover")
 	Point differential to AA.
 ]]
 
--- Clientside now
+-- Clientside now. All we do is listen for broadcasts for values calculated by the game and then display them. 
 d = Def.ActorFrame{
 	LoadFont("Common Normal")..{											
 		Name = "Display",
 		InitCommand=cmd(xy,SCREEN_CENTER_X+26,SCREEN_CENTER_Y+30;zoom,0.4;halign,0;valign,1),
 		JudgmentMessageCommand=function(self,msg)
-			tDiff = Round(msg.WifeDifferential, 2)
+			tDiff = msg.WifeDifferential
 			if tDiff >= 0 then 											
 				tDiff = "+"..tDiff
 				diffuse(self,positive)
 			else
 				diffuse(self,negative)
 			end
-			settext(self,tDiff)
+			self:settextf("%5.2f", tDiff)
 		end
 	},
 	LoadFont("Common Large")..{											
@@ -130,6 +131,7 @@ d = Def.ActorFrame{
 		end,
 		JudgmentMessageCommand=function(self,msg)
 			self:settextf("%05.2f%%", msg.WifePercent)
+			wifetotalpercent = msg.TotalPercent
 		end
 	}
 }
@@ -229,7 +231,7 @@ local currentbar = 1 									-- so we know which error bar we need to update
 local ingots = {}										-- references to the error bars
 
 -- Makes the error bars. They position themselves relative to the center of the screen based on your dv and diffuse to your judgement value before disappating or refreshing
--- Seriously wonder if it would be better to use sprites for this lmao
+-- Should eventually be handled by the game itself to optimize performance
 function smeltErrorBar(index)
 	return Def.Quad{
 		Name = index,
@@ -252,9 +254,9 @@ local e = Def.ActorFrame{
 		end
 	end,
 	SpottedOffsetMessageCommand=function(self)				
-		currentbar = ((currentbar)%barcount) + 1					-- Modulo apparently skips the value of 1 as it loops around, this means that only 29 out of the 30 bars are ever updated. Will fix later.*
-		playcommand(ingots[currentbar],"UpdateErrorBar")			-- Send a single message to the one bar that needs updating since only a single bar needs to be updated per judgment
-	end,															-- *note on modulo, tried a couple alternatives but they were both slower so leaving for now
+		currentbar = ((currentbar)%barcount) + 1
+		playcommand(ingots[currentbar],"UpdateErrorBar")			-- Update the next bar in the queue
+	end,
 	DootCommand=function(self)
 		self:RemoveChild("DestroyMe")
 		self:RemoveChild("DestroyMe2")
