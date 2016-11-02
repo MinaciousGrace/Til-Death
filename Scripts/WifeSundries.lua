@@ -110,9 +110,11 @@ end
 
 -- Calculates ms frequency of the rounded timing data
 function ms.freq(td)
+	local c
 	local o = ms.freqTableInit(200)			-- oops....
 	for i=1,#td do 							-- moved the rounding to integer values here so digits can be preserved in the original data
-		o[notShit.round(td[i])] = o[notShit.round(td[i])] + 1
+		c = notShit.round(math.abs(td[i]))
+		o[c] = o[c] + 1
 	end
 	return o
 end
@@ -129,7 +131,7 @@ end
 -- Wrapper for full timing data tables
 function ms.round(t, y)
 	for i=1,#t do
-		t[i] = notShit.round(math.abs(t[i]), y)
+		t[i] = notShit.round(t[i], y)
 	end
 	return(t)
 end

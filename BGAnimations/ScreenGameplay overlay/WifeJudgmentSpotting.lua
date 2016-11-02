@@ -36,8 +36,6 @@ local negative = getMainColor('negative')
 local wifetotalpercent = 0
 
 -- We can also pull in some localized aliases for workhorse functions for a modest speed increase
-local Abs = math.abs
-local Floor = math.floor
 local Round = notShit.round
 local diffusealpha = Actor.diffusealpha
 local diffuse = Actor.diffuse
