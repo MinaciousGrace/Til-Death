@@ -125,7 +125,7 @@ d = Def.ActorFrame{
 	},
 	LoadFont("Common Large")..{											
 		Name = "DisplayPercent",
-		InitCommand=cmd(xy,SCREEN_CENTER_X-160,SCREEN_CENTER_Y+180;zoom,0.4;halign,0;valign,1),
+		InitCommand=cmd(xy,115,220;zoom,0.3;halign,1;valign,1),
 		OnCommand=function(self)
 			self:settextf("%05.2f%%", 0)
 		end,
@@ -193,7 +193,7 @@ local j = Def.ActorFrame{
 
 
 -- Background
-j[#j+1] = Def.Quad{InitCommand=cmd(xy,frameX,frameY;zoomto,frameWidth,frameHeight;diffuse,color("0,0,0,0.4");horizalign,left;vertalign,top)}
+j[#j+1] = Def.Quad{InitCommand=cmd(xy,frameX,frameY+20;zoomto,frameWidth,frameHeight+20;diffuse,color("0,0,0,0.4");horizalign,left;vertalign,top)}
 
 -- Build judgeboard
 for i=1,#jdgT do
