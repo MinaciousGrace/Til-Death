@@ -193,6 +193,24 @@ function wifeMean(t)
 	return o/c
 end
 
+function wifeStd(t)
+	local u = wifeMean(t)
+	local u2 = 0
+	for i=1,#t do
+		u2 = u2 + (t[i]-u)^2
+	end
+	return math.sqrt(u2/(#t-1))
+end
+
+function wifeRange(t)
+	local x,y = 10000,0
+	for i=1,#t do
+		if math.abs(t[i]) < math.abs(x) then x = t[i] end
+		if math.abs(t[i]) > math.abs(y) then y = t[i] end
+	end
+	return x,y
+end
+
 -- for converting old scores
 function ms.convertJudgmentsToMs(score)
 	local timedWindows = {22.5,45,90,135,180}		-- k this is getting opague to the point of disaster... the conversion process assumes everything is j4 however the point tables are calculated
@@ -225,43 +243,6 @@ end
 function notShit.round(x, y)
 	y = 10^(y or 0)
 	return math.floor(x*y+0.5)/y
-end
-
--- bullshit for the chartkey script that needs to be redone
-function realsplit(s,y)
-	local strfind = string.find
-	local strsub = string.sub
-	local o = {}
-	local function split(i,j)
-		j = strfind(s,y,j+1)
-		if not j then 
-			o[#o+1] = strsub(s,i+1)
-			return o
-		end
-		o[#o+1] = strsub(s,i+1,j-1)
-		return split(j,j)
-	end
-	local j = strfind(s,y)
-	o[1] = strsub(s,1,j-1)
-	return split(j,j)
-end
-
-function intab(x, t)
-	for i=1, #t do
-		if t[i] == x then
-			return true
-		end
-	end
-	return false
-end
-
-function getvalkey(x, t)
-	for i=1, #t do
-		if t[i] == x then
-			return i
-		end
-	end
-	return false
 end
 
 -- more bullshit, pretty sure theres something that does this already but its faster to write it than find it (only used for hashing scoring prefs)

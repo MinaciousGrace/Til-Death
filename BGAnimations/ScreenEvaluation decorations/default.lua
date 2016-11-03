@@ -118,34 +118,6 @@ function scoreBoard(pn,position)
 		end
 	};
 	
-	--[[
-	t[#t+1] = LoadFont("Common Normal")..{
-		InitCommand=cmd(xy,frameX+50,frameY+230;zoom,0.4;halign,0;);
-		BeginCommand=cmd(queuecommand,"Set");
-		SetCommand=function(self)
-			local early = {}
-			local late = {}
-			local total = {}
-			for k, v in pairs (getOffsetTableST(pn)) do
-				total[k] = v
-				if v < 0 then
-				early[k] = v
-				else
-				late[k] = v
-				end
-			end
-			-- 'Avg MS'..tablemean(getOffsetTableST(pn))..
-			self:settext('Avg Total: '..tablemean(total)..'ms   Avg Early: '..tablemean(early)..'ms   Avg Late: '..tablemean(late)..'ms')
-		end;
-	};
-		--]]
-
-
-
-	
-
-
-
 	t[#t+1] = LoadFont("Common Normal")..{
 		InitCommand=cmd(xy,frameX+5,frameY+63;zoom,0.40;halign,0;maxwidth,frameWidth/0.4);
 		BeginCommand=cmd(queuecommand,"Set");
@@ -161,21 +133,21 @@ function scoreBoard(pn,position)
 			BeginCommand=cmd(glowshift;effectcolor1,color("1,1,1,"..tostring(pss:GetPercentageOfTaps(v)*0.4));effectcolor2,color("1,1,1,0");sleep,0.5;decelerate,2;zoomx,frameWidth*pss:GetPercentageOfTaps(v))
 		};
 		t[#t+1] = LoadFont("Common Large")..{
-			InitCommand=cmd(xy,frameX+10,frameY+80+((k-1)*22);zoom,0.30;halign,0),
+			InitCommand=cmd(xy,frameX+10,frameY+80+((k-1)*22);zoom,0.25;halign,0),
 			BeginCommand=cmd(queuecommand,"Set"),
 			SetCommand=function(self) 
 				self:settext(getJudgeStrings(v))
 			end
 		};
 		t[#t+1] = LoadFont("Common Large")..{
-			InitCommand=cmd(xy,frameX+frameWidth-40,frameY+80+((k-1)*22);zoom,0.30;halign,1),
+			InitCommand=cmd(xy,frameX+frameWidth-40,frameY+80+((k-1)*22);zoom,0.25;halign,1),
 			BeginCommand=cmd(queuecommand,"Set"),
 			SetCommand=function(self) 
 				self:settext(pss:GetTapNoteScores(v))
 			end
 		};
 		t[#t+1] = LoadFont("Common Normal")..{
-			InitCommand=cmd(xy,frameX+frameWidth-38,frameY+80+((k-1)*22);zoom,0.30;halign,0),
+			InitCommand=cmd(xy,frameX+frameWidth-38,frameY+80+((k-1)*22);zoom,0.3;halign,0),
 			BeginCommand=cmd(queuecommand,"Set"),
 			SetCommand=function(self) 
 				self:settextf("(%03.2f%%)",pss:GetPercentageOfTaps(v)*100)
@@ -186,13 +158,7 @@ function scoreBoard(pn,position)
 	local fart = {"Holds", "Mines", "Rolls", "Lifts", "Fakes"}
 	t[#t+1] = Def.Quad{InitCommand=cmd(xy,frameX-5,frameY+230;zoomto,frameWidth/2-10,60;halign,0;valign,0;diffuse,color("#333333CC"))};
 	for i=1,#fart do
-		t[#t+1] = LoadFont("Common Normal")..{
-			InitCommand=cmd(xy,frameX,frameY+230+10*i;zoom,0.4;halign,0),
-			BeginCommand=cmd(queuecommand,"Set"),
-			SetCommand=function(self) 
-				self:settext(fart[i])
-			end
-		};
+		t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,frameX,frameY+230+10*i;zoom,0.4;halign,0;settext,fart[i])};
 		t[#t+1] = LoadFont("Common Normal")..{
 			InitCommand=cmd(xy,frameWidth/2,frameY+230+10*i;zoom,0.4;halign,1),
 			BeginCommand=cmd(queuecommand,"Set"),
@@ -200,6 +166,23 @@ function scoreBoard(pn,position)
 				self:settextf("%03d/%03d",pss:GetRadarActual():GetValue("RadarCategory_"..fart[i]),pss:GetRadarPossible():GetValue("RadarCategory_"..fart[i]))
 			end
 		};
+	end
+	
+	-- stats stuff
+	t[#t+1] = Def.Quad{InitCommand=cmd(xy,frameWidth+25,frameY+230;zoomto,frameWidth/2+10,60;halign,1;valign,0;diffuse,color("#333333CC"))};
+	local smallest,largest = wifeRange(devianceTable)
+	local doot = {"Mean", "Mean(Abs)", "Std", "Smallest", "Largest"}
+	local mcscoot = {
+		wifeMean(devianceTable), 
+		ms.tableSum(devianceTable, 1,true)/#devianceTable,
+		wifeStd(devianceTable),
+		smallest, 
+		largest
+	}
+
+	for i=1,#doot do
+		t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,frameX+100,frameY+230+10*i;zoom,0.4;halign,0;settext,doot[i])};
+		t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,frameWidth+20,frameY+230+10*i;zoom,0.4;halign,1;settextf,"%5.2fms",mcscoot[i])};
 	end
 	
 	return t
