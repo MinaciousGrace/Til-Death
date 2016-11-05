@@ -2,7 +2,9 @@ local plotWidth, plotHeight = 400,120
 local plotX, plotY = SCREEN_WIDTH - 9 - plotWidth/2, SCREEN_HEIGHT - 56 - plotHeight/2
 local dotDims, plotMargin = 2, 4
 local maxOffset = 180
-
+local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(PLAYER_1)
+local devianceTable = pss:GetOffsetVector()
+local NoteRowTable = pss:GetNoteRowVector()
 local td = GAMESTATE:GetCurrentSteps(PLAYER_1):GetTimingData()
 local finalSecond = GAMESTATE:GetCurrentSong(PLAYER_1):GetLastSecond()
 

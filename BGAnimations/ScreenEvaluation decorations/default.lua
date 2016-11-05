@@ -91,7 +91,7 @@ function scoreBoard(pn,position)
 	};
 	
 	t[#t+1] = LoadFont("Common Large") .. {
-		InitCommand=cmd(xy,frameX+5,frameY+30;zoom,0.5;halign,0;valign,0;maxwidth,120),
+		InitCommand=cmd(xy,frameX+5,frameY+30;zoom,0.5;halign,0;valign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
 			local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
@@ -169,6 +169,7 @@ function scoreBoard(pn,position)
 	end
 	
 	-- stats stuff
+	devianceTable = pss:GetOffsetVector()
 	t[#t+1] = Def.Quad{InitCommand=cmd(xy,frameWidth+25,frameY+230;zoomto,frameWidth/2+10,60;halign,1;valign,0;diffuse,color("#333333CC"))};
 	local smallest,largest = wifeRange(devianceTable)
 	local doot = {"Mean", "Mean(Abs)", "Sd", "Smallest", "Largest"}
@@ -181,7 +182,7 @@ function scoreBoard(pn,position)
 	}
 
 	for i=1,#doot do
-		t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,frameX+100,frameY+230+10*i;zoom,0.4;halign,0;settext,doot[i])};
+		t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,frameX+capWideScale(get43size(130),160),frameY+230+10*i;zoom,0.4;halign,0;settext,doot[i])};
 		t[#t+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,frameWidth+20,frameY+230+10*i;zoom,0.4;halign,1;settextf,"%5.2fms",mcscoot[i])};
 	end
 	
@@ -189,27 +190,16 @@ function scoreBoard(pn,position)
 end;
 
 
-if GAMESTATE:GetNumPlayersEnabled() >= 1 then
-	if GAMESTATE:IsPlayerEnabled(PLAYER_1) then
-		--initScoreList(PLAYER_1)
-		t[#t+1] = scoreBoard(PLAYER_1,0)
-		if ShowStandardDecoration("GraphDisplay") then
-			t[#t+1] = StandardDecorationFromTable( "GraphDisplay" .. ToEnumShortString(PLAYER_1), GraphDisplay(PLAYER_1) )
-		end;
-		if ShowStandardDecoration("ComboGraph") then
-			t[#t+1] = StandardDecorationFromTable( "ComboGraph" .. ToEnumShortString(PLAYER_1),ComboGraph(PLAYER_1) );
-		end;
-	elseif GAMESTATE:IsPlayerEnabled(PLAYER_2) then
-		--initScoreList(PLAYER_2)
-		t[#t+1] = scoreBoard(PLAYER_2,0)
-		if ShowStandardDecoration("GraphDisplay") then
-			t[#t+1] = StandardDecorationFromTable( "GraphDisplay" .. ToEnumShortString(PLAYER_2), GraphDisplay(PLAYER_2) )
-		end;
-		if ShowStandardDecoration("ComboGraph") then
-			t[#t+1] = StandardDecorationFromTable( "ComboGraph" .. ToEnumShortString(PLAYER_2),ComboGraph(PLAYER_2) );
-		end;
-	end;
-end;
+if GAMESTATE:IsPlayerEnabled(PLAYER_1) then
+	t[#t+1] = scoreBoard(PLAYER_1,0)
+	if ShowStandardDecoration("GraphDisplay") then
+		t[#t+1] = StandardDecorationFromTable( "GraphDisplay" .. ToEnumShortString(PLAYER_1), GraphDisplay(PLAYER_1) )
+	end
+	if ShowStandardDecoration("ComboGraph") then
+		t[#t+1] = StandardDecorationFromTable( "ComboGraph" .. ToEnumShortString(PLAYER_1),ComboGraph(PLAYER_1) )
+	end
+end
+
 
 t[#t+1] = LoadActor("offsetplot")
 

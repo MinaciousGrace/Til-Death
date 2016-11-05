@@ -217,6 +217,12 @@ t[#t+1] = Def.ActorFrame{
 		end,
 		RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
 	},
+	-- LoadFont("Common Normal")..{
+		-- InitCommand=cmd(xy,frameX+100,frameY+4;zoom,0.4;halign,0),
+		-- ChartInfoMessageCommand=function(self, msg)
+			-- self:settext(msg.ChartKey)
+		-- end
+	-- },
 }
 
 -- "Radar values" aka basic chart information
