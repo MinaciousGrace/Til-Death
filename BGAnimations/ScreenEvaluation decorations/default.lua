@@ -1,5 +1,5 @@
 local t = Def.ActorFrame{}
-t[#t+1] = LoadActor("wifescold")
+--t[#t+1] = LoadActor("wifescold")
 
 local scoreType = themeConfig:get_data().global.DefaultScoreType
 
@@ -106,7 +106,7 @@ function scoreBoard(pn,position)
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self) 
 			self:diffuse(getGradeColor(score.Metadata.Grade))
-			self:settextf("%05.2f%%", score.ScoreTable[scoreType].Percent)
+			self:settextf("%05.2f%%", pss:GetWifeScore()*100)
 		end,
 	};
 	

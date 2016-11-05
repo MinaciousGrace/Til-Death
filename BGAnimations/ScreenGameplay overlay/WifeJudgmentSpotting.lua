@@ -20,20 +20,12 @@ local jdgT = {										-- Table of judgments for the judgecounter
 	"HoldNoteScore_LetGo",
 }
 
-
-
-devianceTable = nil															-- Not really caring about global namespace pollution at the moment
-NoteRowTable = nil	
-local dvT = {}																-- But we'll make a local reference for a slight speed increase during gameplay
-local nrT = {}																-- This is for storing the note row the judgment was made on
 local sT = scoringTypes[themeConfig:get_data().global.DefaultScoreType]			
-local pT = sT.PointTable																														
 local dvCur																	
 local jdgCur																-- Note: only for judgments with OFFSETS, might reorganize a bit later
 local positive = getMainColor("positive")
 local highlight = getMainColor("highlight")
 local negative = getMainColor('negative')
-local wifetotalpercent = 0
 
 -- We can also pull in some localized aliases for workhorse functions for a modest speed increase
 local Round = notShit.round
@@ -46,9 +38,6 @@ local queuecommand = Actor.queuecommand
 local playcommand = Actor.queuecommand
 local settext = BitmapText.settext
 local Broadcast = MessageManager.Broadcast
-
--- ugh, for preventing song search from sending you back to a search result if you scroll somewhere else, enter, and then quit
-storeSongSearchResult(GAMESTATE:GetCurrentSong(), GAMESTATE:GetCurrentSteps(PLAYER_1))
 
 -- temporary measure so mini option aka receptor size selection saves
 local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
@@ -70,15 +59,8 @@ local t = Def.ActorFrame{
 			dvCur = msg.Offset 
 			jdgCur = msg.Judgment
 			Broadcast(MESSAGEMAN, "SpottedOffset")
-			dvT[#dvT+1]	= dvCur
-			nrT[#nrT+1]	= msg.NoteRow
 		end
 	end,
-	SongFinishedMessageCommand=function()
-		dafinalscoreYO = wifetotalpercent
-		devianceTable = dvT
-		NoteRowTable = nrT
-	end
 }
 
 -- Stuff you probably shouldn't turn off, music rate string display
@@ -129,7 +111,6 @@ d = Def.ActorFrame{
 		end,
 		JudgmentMessageCommand=function(self,msg)
 			self:settextf("%05.2f%%", msg.WifePercent)
-			wifetotalpercent = msg.TotalPercent
 		end
 	}
 }

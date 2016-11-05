@@ -3,8 +3,8 @@ local plotX, plotY = SCREEN_WIDTH - 9 - plotWidth/2, SCREEN_HEIGHT - 56 - plotHe
 local dotDims, plotMargin = 2, 4
 local maxOffset = 180
 local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(PLAYER_1)
-local devianceTable = pss:GetOffsetVector()
-local NoteRowTable = pss:GetNoteRowVector()
+local dvt = pss:GetOffsetVector()
+local nrt = pss:GetNoteRowVector()
 local td = GAMESTATE:GetCurrentSteps(PLAYER_1):GetTimingData()
 local finalSecond = GAMESTATE:GetCurrentSong(PLAYER_1):GetLastSecond()
 
@@ -29,7 +29,7 @@ o[#o+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,-plotWidth/2,-plotHeigh
 o[#o+1] = LoadFont("Common Normal")..{InitCommand=cmd(xy,-plotWidth/2,plotHeight/2;settext,"Early (-180ms)";zoom,0.35;halign,0;valign,1)}
 -- Plot Dots
 for i=1,#devianceTable do
-	o[#o+1] = plotOffset(td:GetElapsedTimeFromNoteRow(NoteRowTable[i]), devianceTable[i])
+	o[#o+1] = plotOffset(td:GetElapsedTimeFromNoteRow(nrt[i]), dvt[i])
 end
 -- Center Bar
 o[#o+1] = Def.Quad{InitCommand=cmd(zoomto,plotWidth+plotMargin,1;diffuse,color("0.3,0.3,0.3,0.3");diffusealpha,0.5)}
