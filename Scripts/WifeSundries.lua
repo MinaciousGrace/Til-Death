@@ -188,7 +188,9 @@ function wifeMean(t)
 	if c == 0 then return 0 end
 	local o = 0
 	for i=1,c do 
-		o = o + t[i]
+		if t[i] ~= 1000 then
+			o = o + t[i]
+		end
 	end
 	return o/c
 end
@@ -197,7 +199,9 @@ function wifeStd(t)
 	local u = wifeMean(t)
 	local u2 = 0
 	for i=1,#t do
-		u2 = u2 + (t[i]-u)^2
+		if t[i] ~= 1000 then
+			u2 = u2 + (t[i]-u)^2
+		end
 	end
 	return math.sqrt(u2/(#t-1))
 end
@@ -205,8 +209,10 @@ end
 function wifeRange(t)
 	local x,y = 10000,0
 	for i=1,#t do
-		if math.abs(t[i]) < math.abs(x) then x = t[i] end
-		if math.abs(t[i]) > math.abs(y) then y = t[i] end
+		if t[i] ~=1000 then
+			if math.abs(t[i]) < math.abs(x) then x = t[i] end
+			if math.abs(t[i]) > math.abs(y) then y = t[i] end
+		end
 	end
 	return x,y
 end

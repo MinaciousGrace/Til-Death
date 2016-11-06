@@ -17,6 +17,7 @@ local function fitY(y)	-- Scale offset values to fit within plot height
 end
 
 local function plotOffset(nr,dv)
+	if dv == 1000 then return end
 	return Def.Quad{InitCommand=cmd(xy,fitX(nr),fitY(dv);zoomto,dotDims,dotDims;diffuse,offsetToJudgeColor(dv/1000))}
 end
 
@@ -32,7 +33,7 @@ for i=1,#devianceTable do
 	o[#o+1] = plotOffset(td:GetElapsedTimeFromNoteRow(nrt[i]), dvt[i])
 end
 -- Center Bar
-o[#o+1] = Def.Quad{InitCommand=cmd(zoomto,plotWidth+plotMargin,1;diffuse,color("0.3,0.3,0.3,0.3");diffusealpha,0.5)}
+o[#o+1] = Def.Quad{InitCommand=cmd(zoomto,plotWidth+plotMargin,1;diffuse,color("0.3,0.3,0.3,0.3");diffusealpha,0.8)}
 
 return o
 

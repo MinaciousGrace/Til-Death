@@ -15,6 +15,8 @@ if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).OneShotMirror then
 	playeroptions:Mirror( false )
 end
 
+local sscoot = PROFILEMAN:GetProfile(PLAYER_1)
+
 local frameX = 10
 local frameY = 250+capWideScale(get43size(120),120)
 local frameWidth = capWideScale(get43size(455),455)
@@ -86,6 +88,8 @@ t[#t+1] = Def.Actor{
 		if song then 
 			local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
 				getCurKey()
+				--sloop = sscoot:GetHighScoresByKey(steps:GetWifeChartKey())
+				--ms.ok(#sloop)
 			if steps:GetStepsType() == "StepsType_Dance_Single"	 then
 				msTableChartUpdate(song, steps)
 				Meta = getCurChart().ChartMeta
@@ -217,12 +221,6 @@ t[#t+1] = Def.ActorFrame{
 		end,
 		RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
 	},
-	-- LoadFont("Common Normal")..{
-		-- InitCommand=cmd(xy,frameX+100,frameY+4;zoom,0.4;halign,0),
-		-- ChartInfoMessageCommand=function(self, msg)
-			-- self:settext(msg.ChartKey)
-		-- end
-	-- },
 }
 
 -- "Radar values" aka basic chart information

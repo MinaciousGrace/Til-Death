@@ -85,6 +85,20 @@ function getScoreList(pn)
 	return nil
 end
 
+function getScoresByKey(pn)
+	local song = GAMESTATE:GetCurrentSong()
+	local profile
+	local steps
+	if GAMESTATE:IsPlayerEnabled(pn) then
+		profile = GetPlayerOrMachineProfile(pn)
+		steps = GAMESTATE:GetCurrentSteps(pn)
+		if profile ~= nil and steps ~= nil and song ~= nil then
+			return profile:GetHighScoresByKey(steps:GetWifeChartKey())
+		end
+	end
+	return nil
+end
+
 function getScoreFromTable(hsTable,index)
 	return hsTable[index]
 end

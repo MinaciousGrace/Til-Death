@@ -105,7 +105,7 @@ function scoreBoard(pn,position)
 		InitCommand=cmd(xy,frameWidth+frameX,frameY+2;zoom,0.5;halign,1;valign,0;maxwidth,200),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self) 
-			self:diffuse(getGradeColor(score.Metadata.Grade))
+			self:diffuse(getGradeColor(pss:GetGrade()))
 			self:settextf("%05.2f%%", pss:GetWifeScore()*100)
 		end,
 	};
@@ -114,7 +114,7 @@ function scoreBoard(pn,position)
 		InitCommand=cmd(xy,frameX+5,frameY+2;zoom,0.5;halign,0;valign,0);
 		BeginCommand=function(self)
 			self:settext(scoringToText(0)..":")
-			self:diffuse(getGradeColor(score.Metadata.Grade))
+			self:diffuse(getGradeColor(pss:GetGrade()))
 		end
 	};
 	
