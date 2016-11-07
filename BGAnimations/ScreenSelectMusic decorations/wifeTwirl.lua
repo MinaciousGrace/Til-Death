@@ -1,28 +1,13 @@
--- **Initialize the point tables that will be used to calculate scores**
-if #scoringTypes[1].PointTable == 0 then
-	initPointTables() -- boop
-end
-
-if not isJudgeSame() then
-	ms.ok("Updating point tables for: J"..GetTimingDifficulty())
-	updatePointTables()
-end
-
-
 local profile = PROFILEMAN:GetProfile(PLAYER_1)
-
-
 local frameX = 10
 local frameY = 250+capWideScale(get43size(120),90)
 local frameWidth = capWideScale(get43size(455),455)
 local scoreType = themeConfig:get_data().global.DefaultScoreType
 local Score
-local Meta
-local bestscore
 local song
+local steps
 local alreadybroadcasted
 
--- **Set the stage... and... curtains**
 local update = false
 local t = Def.ActorFrame{
 	BeginCommand=cmd(queuecommand,"Set"),
@@ -77,16 +62,16 @@ t[#t+1] = Def.Actor{
 		alreadybroadcasted = true
 	end,
 	CurrentSongChangedMessageCommand=function(self)
-	-- This will disable mirror when switching songs if OneShotMirror is enabled
-	if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).OneShotMirror then		
-		local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
-		local playeroptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions(modslevel)
-		playeroptions:Mirror( false )
-	end
-	self:queuecommand("Set")
+		if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).OneShotMirror then	-- This will disable mirror when switching songs if OneShotMirror is enabled
+			local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
+			local playeroptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions(modslevel)
+			playeroptions:Mirror( false )
+		end
+		self:queuecommand("Set")
 	end,
 }
 
+-- fix up later
 local function GetBestScoreByFilter(perc,CurRate)
 	local rtTable = getRateTable(PROFILEMAN:GetProfile(PLAYER_1):GetHighScoresByKey(getCurKey()))
 	local rates = tableKeys(rtTable)
@@ -111,7 +96,7 @@ local function GetBestScoreByFilter(perc,CurRate)
 	end		
 end
 
-local function GetDisplayedScore()
+local function GetDisplayScore()
 	local Score
 	Score = GetBestScoreByFilter(0, true)
 	if not Score then Score = GetBestScoreByFilter(0.9, false) end
@@ -120,33 +105,17 @@ local function GetDisplayedScore()
 	return Score
 end
 
-
-
 t[#t+1] = Def.Actor{
 	SetCommand=function(self)		
 		if song then 
-			local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
-			Score = GetDisplayedScore()
-
-
-			if steps:GetStepsType() == "StepsType_Dance_Single"	 then
-				msTableChartUpdate(song, steps)
-				Meta = getCurChart().ChartMeta
-				bestscore = getRateScoresBestScore(getCurRateScores(), scoreType, "Grade_Failed") 	-- look for the best non-fail score on the current rate
-				if not bestscore then 
-					bestscore = getAlternativeBestRateScores(scoreType)		-- if nothing is found loop through the score table to find the best non-fail score
-				end															-- if still nothing is found, display the best failed score found starting with the
-				MESSAGEMAN:Broadcast("RefreshChartInfo")					-- currently selected rate and then descending downwards from the highest rate played
-			end
+			steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
+			Score = GetDisplayScore()
+			MESSAGEMAN:Broadcast("RefreshChartInfo")
 		end
 	end,
 	UpdateChartMessageCommand=cmd(queuecommand,"Set"),
 	CurrentRateChangedMessageCommand=function()
-		Score = GetDisplayedScore()
-		bestscore = getRateScoresBestScore(getCurRateScores(), scoreType, "Grade_Failed") 	-- look for the best non-fail score on the current rate
-		if not bestscore then 
-			bestscore = getAlternativeBestRateScores(scoreType)		-- if nothing is found loop through the score table to find the best non-fail score
-		end		
+		Score = GetDisplayScore()
 	end,
 }
 
@@ -242,8 +211,8 @@ t[#t+1] = Def.ActorFrame{
 		InitCommand=cmd(xy,frameX+55,frameY+58;zoom,0.5;halign,0.5),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
-			if song and bestscore then 
-			local rate = bestscore.Metadata.Rate
+			if song and Score then 
+			local rate = getRate(Score)
 				if getCurRateString() ~= rate then
 					self:settext("("..rate..")")
 				else
@@ -262,8 +231,8 @@ t[#t+1] = Def.ActorFrame{
 		InitCommand=cmd(xy,frameX+185,frameY+59;zoom,0.4;halign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
-			if song and bestscore then
-					self:settext(bestscore.Metadata.DateAchieved)
+			if song and Score then
+					self:settext(Score:GetDate())
 				else
 					self:settext("")
 				end
@@ -277,8 +246,8 @@ t[#t+1] = Def.ActorFrame{
 		InitCommand=cmd(xy,frameX+185,frameY+49;zoom,0.4;halign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
-			if song and bestscore then
-				self:settextf("Max Combo: %d", bestscore.Metadata.MaxCombo)
+			if song and Score then
+				self:settextf("Max Combo: %d", Score:GetMaxCombo())
 			else
 				self:settext("")
 			end
@@ -307,25 +276,12 @@ local function radarPairs(i)
 			InitCommand=cmd(xy,frameX+105,frameY+-52+13*i;zoom,0.5;halign,1;maxwidth,60),
 			SetCommand=function(self)
 				if song then		
-					self:settext(Meta.RadarValues[ms.RelevantRadars[i]])
+					self:settext(GAMESTATE:GetCurrentSteps(PLAYER_1):GetRelevantRadars(PLAYER_1)[i])
 				else
 					self:settext("")
 				end
 			end,
 			RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
-		},
-		
-		LoadFont("Common Normal")..{														-- doesnt look nice on the general screen will move it later to the simfile tab i guess
-			InitCommand=cmd(xy,frameX+80,frameY+-52+13*i;zoom,0.5;halign,0;maxwidth,50),
-			SetCommand=function(self)
-				if song and i ~= 1 then					
-					--pself:settextf("%4.1f%%", Meta.RadarValues[ms.RelevantRadars[i]]/Meta.RadarValues[ms.RelevantRadars[1]]*100) 
-				else
-					self:settext("")
-				end
-			end,
-			RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
-			
 		},
 	}
 	return o
@@ -358,8 +314,8 @@ t[#t+1] = LoadFont("Common Large") .. {
 	BeginCommand=cmd(queuecommand,"Set");
 	SetCommand=function(self)
 		if song then
-			self:settext(SecondsToMMSS(Meta.Duration))
-			self:diffuse(getSongLengthColor(Meta.Duration))
+			self:settext(SecondsToMMSS(song:MusicLengthSeconds()))
+			self:diffuse(getSongLengthColor(song:MusicLengthSeconds()))
 		else
 			self:settext("")
 		end
@@ -437,20 +393,14 @@ t[#t+1] = Def.Sprite {
 }
 
 -- test actor
-t[#t+1] = LoadFont("Common Large") .. {
-	InitCommand=cmd(xy,frameX,frameY-62;halign,0;zoom,0.5);
-	BeginCommand=cmd(queuecommand,"Set");
-	SetCommand=function(self)
-		--File.Write(song:GetSongDir().."keyrecord.txt", GAMESTATE:GetCurrentSteps(PLAYER_1):GetWifeChartKeyRecord())
-		self:settext("")
-	end,
-	CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set"),
-	RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
-}
-
-
-
-
-
+-- t[#t+1] = LoadFont("Common Large") .. {
+	-- InitCommand=cmd(xy,frameX,frameY-62;halign,0;zoom,0.5);
+	-- BeginCommand=cmd(queuecommand,"Set");
+	-- SetCommand=function(self)
+		-- self:settext("")
+	-- end,
+	-- CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set"),
+	-- RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
+-- }
 
 return t
