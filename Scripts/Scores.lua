@@ -93,7 +93,7 @@ function getScoresByKey(pn)
 		profile = GetPlayerOrMachineProfile(pn)
 		steps = GAMESTATE:GetCurrentSteps(pn)
 		if profile ~= nil and steps ~= nil and song ~= nil then
-			return profile:GetHighScoresByKey(steps:GetWifeChartKey())
+			return profile:GetHighScoresByKey(steps:GetChartKey())
 		end
 	end
 	return nil
@@ -134,6 +134,10 @@ function getMaxHolds(pn)
 		end
 	end
 	return 0
+end
+
+function GetPercentDP(score)
+	return 100*getScore(score,1)/getMaxScore(PLAYER_1, 1)
 end
 
 --Gets the highest score possible for the scoretype

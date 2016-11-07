@@ -9,7 +9,7 @@ local difficultyconvert = {		-- need to double check these
 }
 
 function getCurKey()
-	return GAMESTATE:GetCurrentSteps(PLAYER_1):GetWifeChartKey()
+	return GAMESTATE:GetCurrentSteps(PLAYER_1):GetChartKey()
 end
 
 function fashionChartKey(song, steps)

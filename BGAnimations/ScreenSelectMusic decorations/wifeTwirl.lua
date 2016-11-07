@@ -9,18 +9,14 @@ if not isJudgeSame() then
 end
 
 
-if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).OneShotMirror then
-	local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
-	local playeroptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions(modslevel)
-	playeroptions:Mirror( false )
-end
+local profile = PROFILEMAN:GetProfile(PLAYER_1)
 
-local sscoot = PROFILEMAN:GetProfile(PLAYER_1)
 
 local frameX = 10
-local frameY = 250+capWideScale(get43size(120),120)
+local frameY = 250+capWideScale(get43size(120),90)
 local frameWidth = capWideScale(get43size(455),455)
 local scoreType = themeConfig:get_data().global.DefaultScoreType
+local Score
 local Meta
 local bestscore
 local song
@@ -80,16 +76,59 @@ t[#t+1] = Def.Actor{
 		MESSAGEMAN:Broadcast("UpdateChart")
 		alreadybroadcasted = true
 	end,
-	CurrentSongChangedMessageCommand=cmd(queuecommand,"Set"),
+	CurrentSongChangedMessageCommand=function(self)
+	-- This will disable mirror when switching songs if OneShotMirror is enabled
+	if playerConfig:get_data(pn_to_profile_slot(PLAYER_1)).OneShotMirror then		
+		local modslevel = topscreen  == "ScreenEditOptions" and "ModsLevel_Stage" or "ModsLevel_Preferred"
+		local playeroptions = GAMESTATE:GetPlayerState(PLAYER_1):GetPlayerOptions(modslevel)
+		playeroptions:Mirror( false )
+	end
+	self:queuecommand("Set")
+	end,
 }
+
+local function GetBestScoreByFilter(perc,CurRate)
+	local rtTable = getRateTable(PROFILEMAN:GetProfile(PLAYER_1):GetHighScoresByKey(getCurKey()))
+	local rates = tableKeys(rtTable)
+	local scores, score
+	
+	if CurRate then
+		rates = {getCurRateString()}
+		if not rtTable[rates[1]] then return nil end
+	end
+	
+	for i=1,#rates do
+		scores = rtTable[rates[i]]
+		for ii=1,#scores do
+			score = scores[ii]
+			if score:GetWifeScore() >= perc then
+				return score
+			end
+			if getScore(score,1)/getMaxScore(PLAYER_1,1) >= perc then
+				return score
+			end
+		end
+	end		
+end
+
+local function GetDisplayedScore()
+	local Score
+	Score = GetBestScoreByFilter(0, true)
+	if not Score then Score = GetBestScoreByFilter(0.9, false) end
+	if not Score then Score = GetBestScoreByFilter(0.5, false) end
+	if not Score then Score = GetBestScoreByFilter(0, false) end
+	return Score
+end
+
+
 
 t[#t+1] = Def.Actor{
 	SetCommand=function(self)		
 		if song then 
 			local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
-				getCurKey()
-				--sloop = sscoot:GetHighScoresByKey(steps:GetWifeChartKey())
-				--ms.ok(#sloop)
+			Score = GetDisplayedScore()
+
+
 			if steps:GetStepsType() == "StepsType_Dance_Single"	 then
 				msTableChartUpdate(song, steps)
 				Meta = getCurChart().ChartMeta
@@ -103,6 +142,7 @@ t[#t+1] = Def.Actor{
 	end,
 	UpdateChartMessageCommand=cmd(queuecommand,"Set"),
 	CurrentRateChangedMessageCommand=function()
+		Score = GetDisplayedScore()
 		bestscore = getRateScoresBestScore(getCurRateScores(), scoreType, "Grade_Failed") 	-- look for the best non-fail score on the current rate
 		if not bestscore then 
 			bestscore = getAlternativeBestRateScores(scoreType)		-- if nothing is found loop through the score table to find the best non-fail score
@@ -117,18 +157,18 @@ t[#t+1] = Def.ActorFrame{
 	Def.Quad{InitCommand=cmd(xy,frameX,frameY-76;zoomto,8,144;halign,0;valign,0;diffuse,getMainColor('highlight');diffusealpha,0.5)},		--Side Bar (purple streak on the left)
 
 	-- **Score related stuff** These need to be updated with rate changed commands
-	-- Percent score
+	-- Primary percent score
 	LoadFont("Common Large")..{
 		InitCommand=cmd(xy,frameX+55,frameY+50;zoom,0.6;halign,0.5;maxwidth,125;valign,1),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
-			if song and bestscore then
-				if isFallbackScoreType() == true then
-					self:settextf("%05.2f%%", bestscore.ScoreTable[getfallbackscoreType()].Percent)
-					self:diffuse(getGradeColor(bestscore.Metadata.Grade))
+			if song and Score then
+				if Score:GetWifeScore() == 0 then 
+					self:settextf("%05.2f%%", GetPercentDP(Score))
+					self:diffuse(getGradeColor(Score:GetGrade()))
 				else
-					self:settextf("%05.2f%%", bestscore.ScoreTable[scoreType].Percent)
-					self:diffuse(getGradeColor(bestscore.Metadata.Grade))
+					self:settextf("%05.2f%%", Score:GetWifeScore()*100)
+					self:diffuse(getGradeColor(Score:GetGrade()))
 				end
 			else
 				self:settext("")
@@ -138,16 +178,56 @@ t[#t+1] = Def.ActorFrame{
 		CurrentRateChangedMessageCommand=cmd(queuecommand,"Set"),
 	},
 	
-	-- ScoreType for the given score being displayed
-	LoadFont("Common Normal")..{
-		InitCommand=cmd(xy,frameX+125,frameY+50;zoom,0.5;halign,1;valign,1),
+	-- Primary ScoreType
+	LoadFont("Common Large")..{
+		InitCommand=cmd(xy,frameX+125,frameY+40;zoom,0.3;halign,1;valign,1),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
-			if song and bestscore then 
-				if isFallbackScoreType() == true then
-					self:settext(scoringToText(getfallbackscoreType()).."*")
+			if song and Score then
+				if Score:GetWifeScore() == 0 then 
+					self:settext("DP*")
 				else
 					self:settext(scoringToText(scoreType))
+				end
+			else
+				self:settext("")
+			end
+		end,
+		CurrentRateChangedMessageCommand=cmd(queuecommand,"Set"),
+		RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
+	},
+	
+	-- Secondary percent score
+	LoadFont("Common Normal")..{
+		InitCommand=cmd(xy,frameX+130,frameY+63;zoom,0.6;halign,0.5;maxwidth,125;valign,1),
+		BeginCommand=cmd(queuecommand,"Set"),
+		SetCommand=function(self)
+			if song and Score then
+				if Score:GetWifeScore() == 0 then 
+					self:settextf("NA")
+					self:diffuse(getGradeColor("Grade_Failed"))
+				else
+					self:settextf("%05.2f%%", GetPercentDP(Score))
+					self:diffuse(getGradeColor(Score:GetGrade()))
+				end
+			else
+				self:settext("")
+			end
+		end,
+		RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
+		CurrentRateChangedMessageCommand=cmd(queuecommand,"Set"),
+	},
+	
+	-- Secondary ScoreType
+	LoadFont("Common Normal")..{
+		InitCommand=cmd(xy,frameX+173,frameY+63;zoom,0.4;halign,1;valign,1),
+		BeginCommand=cmd(queuecommand,"Set"),
+		SetCommand=function(self)
+			if song and Score then
+				if Score:GetWifeScore() == 0 then 
+					self:settext("Wife")
+				else
+					self:settext("DP")
 				end
 			else
 				self:settext("")
@@ -179,7 +259,7 @@ t[#t+1] = Def.ActorFrame{
 	
 	-- Date score achieved on
 	LoadFont("Common Normal")..{
-		InitCommand=cmd(xy,frameX+175,frameY+49;zoom,0.4;halign,0),
+		InitCommand=cmd(xy,frameX+185,frameY+59;zoom,0.4;halign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
 			if song and bestscore then
@@ -194,7 +274,7 @@ t[#t+1] = Def.ActorFrame{
 
 	-- MaxCombo
 	LoadFont("Common Normal")..{
-		InitCommand=cmd(xy,frameX+175,frameY+35;zoom,0.4;halign,0),
+		InitCommand=cmd(xy,frameX+185,frameY+49;zoom,0.4;halign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
 			if song and bestscore then
@@ -207,20 +287,6 @@ t[#t+1] = Def.ActorFrame{
 		RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
 	},
 	-- **End score related stuff**
-	
-	-- ChartKey, mostly being displayed for debug/checking purposes
-	LoadFont("Common Normal")..{
-		InitCommand=cmd(xy,frameX+100,frameY+24;zoom,0.4;halign,0),
-		BeginCommand=cmd(queuecommand,"Set"),
-		SetCommand=function(self)
-			if song then
-				self:settext(GAMESTATE:GetCurrentSteps(PLAYER_1):GetWifeChartKey())
-			else
-				self:settext("")
-			end
-		end,
-		RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
-	},
 }
 
 -- "Radar values" aka basic chart information

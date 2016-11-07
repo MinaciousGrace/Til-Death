@@ -61,7 +61,7 @@ local t = Def.ActorFrame{
 	CurrentStepsP2ChangedMessageCommand=cmd(queuecommand,"Set");
 	InitScoreCommand=function(self)
 			if GAMESTATE:GetCurrentSong() ~= nil then
-				hsTable = PROFILEMAN:GetProfile(PLAYER_1):GetHighScoresByKey(GAMESTATE:GetCurrentSteps(PLAYER_1):GetWifeChartKey())				
+				hsTable = getScoresByKey(pn)			
 				if hsTable ~= nil and hsTable[1] ~= nil then
 					rtTable = getRateTable(hsTable)
 					rates,rateIndex = getUsedRates(rtTable)
