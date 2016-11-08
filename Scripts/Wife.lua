@@ -206,7 +206,7 @@ function calcPlayerScore(score, scoreType)
 	local s = {}
 	local o = 0
 	local ntj = score.NonTimedJudgments
-		
+
 	s.Percent = 0								-- actual % score
 	s.Points = {}								-- various point values (player, total, etc)
 	s.JudgeCalc = GetTimingDifficulty() 		-- judge value the score was calculated under, not necessary for ms based systems but whatever for now
@@ -356,7 +356,7 @@ function setCurScore(score)
 	curScore = score
 end
 
-function getCurRateString()							-- need to eventually make all rate mods and related strings explicit and separate from modslevel garbage
+function getCurRateString()
   local rate = GAMESTATE:GetSongOptions('ModsLevel_Song')
   if rate == "" then
     rate = "1.0x"

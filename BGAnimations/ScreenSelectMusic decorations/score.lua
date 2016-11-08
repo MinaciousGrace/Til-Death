@@ -13,25 +13,25 @@ if themeConfig:get_data().global.RateSort then
 	defaultRateText = "1.0x"
 else
 	defaultRateText = "All"
-end;
+end
 
 local t = Def.ActorFrame{
-	BeginCommand=cmd(queuecommand,"Set";visible,false);
-	OffCommand=cmd(bouncebegin,0.2;xy,-500,0;diffusealpha,0;); -- visible(false) doesn't seem to work with sleep
-	OnCommand=cmd(bouncebegin,0.2;xy,0,0;diffusealpha,1;);
+	BeginCommand=cmd(queuecommand,"Set";visible,false),
+	OffCommand=cmd(bouncebegin,0.2;xy,-500,0;diffusealpha,0), -- visible(false) doesn't seem to work with sleep
+	OnCommand=cmd(bouncebegin,0.2;xy,0,0;diffusealpha,1),
 	SetCommand=function(self)
 		self:finishtweening()
 		if getTabIndex() == 2 then
-			self:queuecommand("On");
+			self:queuecommand("On")
 			self:visible(true)
 			update = true
 			self:playcommand("InitScore")
 		else 
-			self:queuecommand("Off");
+			self:queuecommand("Off")
 			update = false
-		end;
-	end;
-	TabChangedMessageCommand=cmd(queuecommand,"Set");
+		end
+	end,
+	TabChangedMessageCommand=cmd(queuecommand,"Set"),
 	CodeMessageCommand=function(self,params)
 		if update then
 			if params.Name == "NextRate" then
@@ -48,17 +48,17 @@ local t = Def.ActorFrame{
 				if rtTable[rates[rateIndex]] ~= nil then
 					scoreIndex = ((scoreIndex-2)%(#rtTable[rates[rateIndex]]))+1
 				end
-			end;
+			end
 			if rtTable[rates[rateIndex]] ~= nil then
 				score = rtTable[rates[rateIndex]][scoreIndex]
 				MESSAGEMAN:Broadcast("ScoreUpdate")
-			end;
-		end;
-	end;
-	PlayerJoinedMessageCommand=cmd(queuecommand,"Set");
-	CurrentSongChangedMessageCommand=cmd(queuecommand,"Set");
-	CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set");
-	CurrentStepsP2ChangedMessageCommand=cmd(queuecommand,"Set");
+			end
+		end
+	end,
+	PlayerJoinedMessageCommand=cmd(queuecommand,"Set"),
+	CurrentSongChangedMessageCommand=cmd(queuecommand,"Set"),
+	CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set"),
+	CurrentStepsP2ChangedMessageCommand=cmd(queuecommand,"Set"),
 	InitScoreCommand=function(self)
 			if GAMESTATE:GetCurrentSong() ~= nil then
 				hsTable = getScoresByKey(pn)			
@@ -79,10 +79,10 @@ local t = Def.ActorFrame{
 				rates,rateIndex = {defaultRateText},1
 				scoreIndex = 1
 				score = nil
-			end;
+			end
 			MESSAGEMAN:Broadcast("ScoreUpdate")
-	end;
-};
+	end
+}
 
 local frameX = 10
 local frameY = 45
@@ -94,22 +94,18 @@ local offsetY = 20
 
 local judges = {'TapNoteScore_W1','TapNoteScore_W2','TapNoteScore_W3','TapNoteScore_W4','TapNoteScore_W5','TapNoteScore_Miss','HoldNoteScore_Held','HoldNoteScore_LetGo'}
 
-t[#t+1] = Def.Quad{
-	InitCommand=cmd(xy,frameX,frameY;zoomto,frameWidth,frameHeight;halign,0;valign,0;diffuse,color("#333333CC"));
-};
-
-t[#t+1] = Def.Quad{
-	InitCommand=cmd(xy,frameX,frameY;zoomto,frameWidth,offsetY;halign,0;valign,0;diffuse,getMainColor('frames');diffusealpha,0.5);
-};
+t[#t+1] = Def.Quad{InitCommand=cmd(xy,frameX,frameY;zoomto,frameWidth,frameHeight;halign,0;valign,0;diffuse,color("#333333CC"))}
+t[#t+1] = Def.Quad{InitCommand=cmd(xy,frameX,frameY;zoomto,frameWidth,offsetY;halign,0;valign,0;diffuse,getMainColor('frames');diffusealpha,0.5)}
 
 t[#t+1] = LoadFont("Common Normal")..{
-	InitCommand=cmd(xy,frameX+5,frameY+offsetY-9;zoom,0.6;halign,0;diffuse,getMainColor('positive'));
+	InitCommand=cmd(xy,frameX+5,frameY+offsetY-9;zoom,0.6;halign,0;diffuse,getMainColor('positive')),
 	BeginCommand=cmd(settext,"Score Info")
-};
+}
+
 
 t[#t+1] = LoadFont("Common Large")..{
 	Name="Grades";
-	InitCommand=cmd(xy,frameX+offsetX,frameY+offsetY+20;zoom,0.6;halign,0;maxwidth,50/0.6);
+	InitCommand=cmd(xy,frameX+offsetX,frameY+offsetY+20;zoom,0.6;halign,0;maxwidth,50/0.6),
 	SetCommand=function(self)
 		if score ~= nil then
 			self:settext(THEME:GetString("Grade",ToEnumShortString(score:GetGrade())))
@@ -118,12 +114,13 @@ t[#t+1] = LoadFont("Common Large")..{
 			self:settext("")
 		end;
 	end;
-	ScoreUpdateMessageCommand=cmd(queuecommand,"Set");
-};
+	ScoreUpdateMessageCommand=cmd(queuecommand,"Set")
+}
 
+-- DP display
 t[#t+1] = LoadFont("Common Normal")..{
 	Name="Score";
-	InitCommand=cmd(xy,frameX+offsetX+55,frameY+offsetY+14;zoom,0.5;halign,0;);
+	InitCommand=cmd(xy,frameX+offsetX+55,frameY+offsetY+14;zoom,0.5;halign,0),
 	SetCommand=function(self)
 		if score ~= nil then
 			local curscore = getScore(score,0)
@@ -133,40 +130,32 @@ t[#t+1] = LoadFont("Common Normal")..{
 			end;
 			local pscore = (curscore/maxscore)
 
-			self:settextf("%05.2f%% (%s)",math.floor((pscore)*10000)/100, scoringToText(getfallbackscoreType()))
+			self:settextf("%05.2f%% (%s)",math.floor((pscore)*10000)/100, scoringToText(1))
 		else
-			self:settextf("00.00%% (%s)", scoringToText(getfallbackscoreType()))
+			self:settextf("00.00%% (%s)", scoringToText(1))
 		end;
 	end;
-	ScoreUpdateMessageCommand=cmd(queuecommand,"Set");
-};
+	ScoreUpdateMessageCommand=cmd(queuecommand,"Set")
+}
 
+-- Wife display
 t[#t+1] = LoadFont("Common Normal")..{
-	Name="RawScore";
-	InitCommand=cmd(xy,frameX+offsetX+55,frameY+offsetY+26;zoom,0.4;halign,0;);
+	Name="Score";
+	InitCommand=cmd(xy,frameX+offsetX+55,frameY+offsetY+28;zoom,0.5;halign,0),
 	SetCommand=function(self)
 		if score ~= nil then
-			local curscore = getScore(score,0)
-			local dpscore = getScore(score,1)
-			local grade = getScoreGrade(score)
-			local neargrade,diff = getNearbyGrade(pn,dpscore,grade)
-			local maxscore = getMaxScore(pn,0)
-			if diff >= 0 then
-				diff = tostring("+"..diff)
+			if score:GetWifeScore() == 0 then 
+				self:settextf("NA (%s)", "Wife")
 			else
-				diff = tostring(diff)
-			end;	
-			if maxscore == 0 or maxscore == nil then
-				maxscore = 1
-			end;
-
-			self:settextf("%04d/%04d (%s %s)",curscore,maxscore,THEME:GetString("Grade",ToEnumShortString(neargrade)),diff)
+				self:settextf("%05.2f%% (%s)", score:GetWifeScore()*100, "Wife")
+			end
 		else
-			self:settext("0000/0000 (D +0)")
+			self:settextf("00.00%% (%s)", "Wife")
 		end;
 	end;
-	ScoreUpdateMessageCommand=cmd(queuecommand,"Set");
-};
+	ScoreUpdateMessageCommand=cmd(queuecommand,"Set")
+}
+
 
 t[#t+1] = LoadFont("Common Normal")..{
 	Name="ClearType";

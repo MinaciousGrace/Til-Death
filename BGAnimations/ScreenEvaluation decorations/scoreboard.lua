@@ -22,7 +22,7 @@ function gradestring(tier) --to be moved
 	end;
 end;
 
-local lines = 7 -- number of scores to display
+local lines = 5 -- number of scores to display
 local framex = SCREEN_WIDTH-capWideScale(get43size(230),230)
 local framey = 60
 local frameWidth = capWideScale(get43size(220),220)
@@ -44,7 +44,7 @@ local player = GAMESTATE:GetEnabledPlayers()[1]
 if GAMESTATE:IsPlayerEnabled(player) then
 	profile = GetPlayerOrMachineProfile(player)
 	steps = STATSMAN:GetCurStageStats():GetPlayerStageStats(player):GetPlayedSteps()[1]
-	origTable = getScoreList(player)
+	origTable = getScoresByKey(player)
 	score = STATSMAN:GetCurStageStats():GetPlayerStageStats(player):GetHighScore()--origTable[STATSMAN:GetCurStageStats():GetPlayerStageStats(player):GetPersonalHighScoreIndex()+1]
 	rtTable = getRateTable(origTable)
 	if themeConfig:get_data().global.RateSort then
@@ -112,23 +112,23 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 		--Quad that will act as the bounding box for mouse rollover/click stuff.
 		Def.Quad{
 			Name="mouseOver";
-			InitCommand=cmd(xy,framex,framey+(drawindex*spacing)-4;zoomto,frameWidth,30;halign,0;valign,0;diffuse,getMainColor('highlight');diffusealpha,0.05;);
+			InitCommand=cmd(xy,framex,framey+(drawindex*spacing)-4;zoomto,frameWidth,30;halign,0;valign,0;diffuse,getMainColor('highlight');diffusealpha,0.05),
 			BeginCommand=function(self)
-				self:visible(false);
-			end;
-		};
+				self:visible(false)
+			end
+		},
 
 		--ClearType lamps
 		Def.Quad{
-			InitCommand=cmd(xy,framex,framey+(drawindex*spacing)-4;zoomto,8,30;halign,0;valign,0;diffuse,getClearTypeFromScore(pn,hsTable[index],2));
+			InitCommand=cmd(xy,framex,framey+(drawindex*spacing)-4;zoomto,8,30;halign,0;valign,0;diffuse,getClearTypeFromScore(pn,hsTable[index],2)),
 			BeginCommand=function(self)
-				self:visible(GAMESTATE:IsHumanPlayer(pn));
-			end;
-		};
+				self:visible(GAMESTATE:IsHumanPlayer(pn))
+			end
+		},
 
 		--rank
 		LoadFont("Common normal")..{
-			InitCommand=cmd(xy,framex-8,framey+12+(drawindex*spacing);zoom,0.35;);
+			InitCommand=cmd(xy,framex-8,framey+12+(drawindex*spacing);zoom,0.35),
 			BeginCommand=function(self)
 				if #hsTable >= 1 then
 					self:settext(index)
@@ -136,15 +136,15 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 						self:diffuse(color("#ffcccc"))
 					else
 						self:stopeffect()
-					end;
-				end;
-			end;
-		};
+					end
+				end
+			end
+		},
 
-		--grade and %score
+		-- DP grade and %score
 		LoadFont("Common normal")..{
 			Name="grade";
-			InitCommand=cmd(xy,framex+10,framey+11+(drawindex*spacing);zoom,0.35;halign,0;maxwidth,(frameWidth-15)/0.35);
+			InitCommand=cmd(xy,framex+10,framey+(drawindex*spacing)+2;zoom,0.35;halign,0;maxwidth,(frameWidth-15)/0.3);
 			BeginCommand=function(self)
 				local curscore = getScore(hsTable[index])
 				local maxscore = getMaxScore(pn,0)
@@ -152,10 +152,23 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 					maxscore = 1
 				end;
 				local pscore = (curscore/maxscore)
-				self:settextf("%s %.2f%% (x%d)",(gradestring(hsTable[index]:GetGrade())),math.floor((pscore)*10000)/100,hsTable[index]:GetMaxCombo()); 
-				--self:settextf("%s",getRate(hsTable[index]))
+				self:settextf("%.2f%% (%s)",math.floor((pscore)*10000)/100,"DP"); 
 			end;
 		};
+		
+		-- Wife grade and %score
+		LoadFont("Common normal")..{
+			Name="grade",
+			InitCommand=cmd(xy,framex+10,framey+11+(drawindex*spacing);zoom,0.35;halign,0;maxwidth,(frameWidth-15)/0.3),
+			BeginCommand=function(self)
+				if hsTable[index]:GetWifeScore() == 0 then 
+					self:settextf("NA (%s)", "Wife")
+				else
+					self:settextf("%05.2f%% (%s)", hsTable[index]:GetWifeScore()*100, "Wife")
+				end
+			end
+		},
+
 
 		--mods
 		LoadFont("Common normal")..{
@@ -166,22 +179,43 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 				self:visible(false)
 			end;
 		};
-
+	
+		--grade text
+		LoadFont("Common normal")..{
+			InitCommand=cmd(xy,framex+130,framey+2+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
+			BeginCommand=function(self)
+				if #hsTable >= 1 and index>= 1 then
+					self:settext(gradestring(hsTable[index]:GetGrade()))
+					self:diffuse(getGradeColor(hsTable[index]:GetGrade()))
+				end
+			end
+		},
+		
 		--cleartype text
 		LoadFont("Common normal")..{
-			InitCommand=cmd(xy,framex+10,framey+2+(drawindex*spacing);zoom,0.35;halign,0;maxwidth,(frameWidth-15)/0.35);
+			InitCommand=cmd(xy,framex+130,framey+12+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
 			BeginCommand=function(self)
 				if #hsTable >= 1 and index>= 1 then
 					self:settext(getClearTypeFromScore(pn,hsTable[index],0))
 					self:diffuse(getClearTypeFromScore(pn,hsTable[index],2))
-				end;
-			end;
-		};
+				end
+			end
+		},
+		
+		--max combo
+		LoadFont("Common normal")..{
+			InitCommand=cmd(xy,framex+130,framey+22+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
+			BeginCommand=function(self)
+				if #hsTable >= 1 and index>= 1 then
+					self:settext(hsTable[index]:GetMaxCombo())
+				end
+			end
+		},
 
 		--judgment
 		LoadFont("Common normal")..{
 			Name="judge";
-			InitCommand=cmd(xy,framex+10,framey+20+(drawindex*spacing);zoom,0.35;halign,0;maxwidth,(frameWidth-15)/0.35);
+			InitCommand=cmd(xy,framex+10,framey+20+(drawindex*spacing);zoom,0.35;halign,0;maxwidth,(frameWidth-15)/0.35),
 			BeginCommand=function(self)
 				if #hsTable >= 1 and index>= 1 then
 					self:settextf("%d / %d / %d / %d / %d / %d",
@@ -191,21 +225,21 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 						hsTable[index]:GetTapNoteScore("TapNoteScore_W4"),
 						hsTable[index]:GetTapNoteScore("TapNoteScore_W5"),
 						hsTable[index]:GetTapNoteScore("TapNoteScore_Miss"))
-				end;
-			end;
-		};
+				end
+			end
+		},
 
 		--date
 		LoadFont("Common normal")..{
 			Name="date";
-			InitCommand=cmd(xy,framex+10,framey+20+(drawindex*spacing);zoom,0.35;halign,0);
+			InitCommand=cmd(xy,framex+10,framey+20+(drawindex*spacing);zoom,0.35;halign,0),
 			BeginCommand=function(self)
 				if #hsTable >= 1 and index>= 1 then
 					self:settext(hsTable[index]:GetDate())
-				end;
+				end
 				self:visible(false)
-			end;
-		};
+			end
+		},
 
 	};
 	return t;

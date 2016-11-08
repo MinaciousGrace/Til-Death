@@ -300,7 +300,12 @@ end
 
 local sortScoreType = 0
 local function scoreComparator(scoreA,scoreB)
-	return  getScore(scoreA,sortScoreType) > getScore(scoreB,sortScoreType)
+	local a = getScore(scoreA,sortScoreType)
+	local b = getScore(scoreB,sortScoreType)
+	if a == b then 
+		return scoreA:GetWifeScore() > scoreB:GetWifeScore()
+	end
+	return a > b 
 end
 
 -- returns a sorted table based on the criteria given by the

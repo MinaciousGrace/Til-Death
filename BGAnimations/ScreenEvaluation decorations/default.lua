@@ -81,7 +81,7 @@ function scoreBoard(pn,position)
 	t[#t+1] = Def.Quad{InitCommand=cmd(xy,frameX,frameY+55;zoomto,frameWidth,2;halign,0;diffuse,getMainColor('highlight');diffusealpha,0.5)};
 
 	t[#t+1] = LoadFont("Common Large")..{
-		InitCommand=cmd(xy,frameWidth+frameX,frameY+30;zoom,0.5;halign,1;valign,0;maxwidth,200),
+		InitCommand=cmd(xy,frameWidth+frameX,frameY+32;zoom,0.5;halign,1;valign,0;maxwidth,200),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
 			local meter = GAMESTATE:GetCurrentSteps(PLAYER_1):GetMeter()
@@ -91,31 +91,34 @@ function scoreBoard(pn,position)
 	};
 	
 	t[#t+1] = LoadFont("Common Large") .. {
-		InitCommand=cmd(xy,frameX+5,frameY+30;zoom,0.5;halign,0;valign,0),
+		InitCommand=cmd(xy,frameWidth+frameX,frameY+7;zoom,0.5;halign,1;valign,0;maxwidth,200),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
 			local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
 			local diff = getDifficulty(steps:GetDifficulty())
-			self:settext(diff..":")
+			self:settext(diff)
 			self:diffuse(getDifficultyColor(GetCustomDifficulty(steps:GetStepsType(),steps:GetDifficulty())))
 		end
 	};
-		
+	
+	-- Wife percent
 	t[#t+1] = LoadFont("Common Large")..{
-		InitCommand=cmd(xy,frameWidth+frameX,frameY+2;zoom,0.5;halign,1;valign,0;maxwidth,200),
+		InitCommand=cmd(xy,frameX+5,frameY+9;zoom,0.45;halign,0;valign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self) 
 			self:diffuse(getGradeColor(pss:GetGrade()))
-			self:settextf("%05.2f%%", pss:GetWifeScore()*100)
+			self:settextf("%05.2f%% (%s)",pss:GetWifeScore()*100, "Wife")
 		end,
 	};
 	
+	-- DP percent
 	t[#t+1] = LoadFont("Common Large")..{
-		InitCommand=cmd(xy,frameX+5,frameY+2;zoom,0.5;halign,0;valign,0);
-		BeginCommand=function(self)
-			self:settext(scoringToText(0)..":")
+		InitCommand=cmd(xy,frameX+5,frameY+34;zoom,0.45;halign,0;valign,0),
+		BeginCommand=cmd(queuecommand,"Set"),
+		SetCommand=function(self) 
 			self:diffuse(getGradeColor(pss:GetGrade()))
-		end
+			self:settextf("%05.2f%% (%s)",pss:GetPercentDancePoints()*100, "DP")
+		end,
 	};
 	
 	t[#t+1] = LoadFont("Common Normal")..{

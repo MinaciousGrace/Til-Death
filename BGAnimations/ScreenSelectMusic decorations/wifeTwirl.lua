@@ -392,15 +392,15 @@ t[#t+1] = Def.Sprite {
 	RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
 }
 
--- test actor
--- t[#t+1] = LoadFont("Common Large") .. {
-	-- InitCommand=cmd(xy,frameX,frameY-62;halign,0;zoom,0.5);
-	-- BeginCommand=cmd(queuecommand,"Set");
-	-- SetCommand=function(self)
-		-- self:settext("")
-	-- end,
-	-- CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set"),
-	-- RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
--- }
+--test actor
+t[#t+1] = LoadFont("Common Large") .. {
+	InitCommand=cmd(xy,frameX,frameY-120;halign,0;zoom,0.4);
+	BeginCommand=cmd(queuecommand,"Set");
+	SetCommand=function(self)
+		self:settext(steps:GetChartKey())
+	end,
+	CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set"),
+	RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
+}
 
 return t
