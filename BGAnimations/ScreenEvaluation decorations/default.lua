@@ -96,7 +96,7 @@ function scoreBoard(pn,position)
 		SetCommand=function(self)
 			local steps = GAMESTATE:GetCurrentSteps(PLAYER_1)
 			local diff = getDifficulty(steps:GetDifficulty())
-			self:settext(diff)
+			self:settext(getShortDifficulty(diff))
 			self:diffuse(getDifficultyColor(GetCustomDifficulty(steps:GetStepsType(),steps:GetDifficulty())))
 		end
 	};
