@@ -182,7 +182,7 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 	
 		--grade text
 		LoadFont("Common normal")..{
-			InitCommand=cmd(xy,framex+130,framey+2+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
+			InitCommand=cmd(xy,framex+130+capWideScale(get43size(0),50),framey+2+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
 			BeginCommand=function(self)
 				if #hsTable >= 1 and index>= 1 then
 					self:settext(gradestring(hsTable[index]:GetGrade()))
@@ -193,7 +193,7 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 		
 		--cleartype text
 		LoadFont("Common normal")..{
-			InitCommand=cmd(xy,framex+130,framey+12+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
+			InitCommand=cmd(xy,framex+130+capWideScale(get43size(0),50),framey+12+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
 			BeginCommand=function(self)
 				if #hsTable >= 1 and index>= 1 then
 					self:settext(getClearTypeFromScore(pn,hsTable[index],0))
@@ -204,10 +204,10 @@ local function scoreitem(pn,index,scoreIndex,drawindex)
 		
 		--max combo
 		LoadFont("Common normal")..{
-			InitCommand=cmd(xy,framex+130,framey+22+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
+			InitCommand=cmd(xy,framex+130+capWideScale(get43size(0),50),framey+22+(drawindex*spacing);zoom,0.35;halign,0.5;maxwidth,(frameWidth-15)/0.35),
 			BeginCommand=function(self)
 				if #hsTable >= 1 and index>= 1 then
-					self:settext(hsTable[index]:GetMaxCombo())
+					self:settextf("%sx",hsTable[index]:GetMaxCombo())
 				end
 			end
 		},

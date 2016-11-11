@@ -298,14 +298,15 @@ t[#t+1] = LoadFont("Common Large") .. {
 	BeginCommand=cmd(queuecommand,"Set");
 	SetCommand=function(self)
 		if song then
-			local meter = GAMESTATE:GetCurrentSteps(PLAYER_1):GetMeter()
-			self:settext(meter)
+			local meter = (3*GAMESTATE:GetCurrentSteps(PLAYER_1):GetMSD())*getCurRateValue()--/1.092
+			self:settextf("%05.2f",meter)
 			self:diffuse(byDifficultyMeter(meter))
 		else
 			self:settext("")
 		end
 	end;
 	RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),
+	CurrentRateChangedMessageCommand=cmd(queuecommand,"Set"),
 }
 
 -- Song duration
@@ -397,7 +398,7 @@ t[#t+1] = LoadFont("Common Large") .. {
 	InitCommand=cmd(xy,frameX,frameY-120;halign,0;zoom,0.4);
 	BeginCommand=cmd(queuecommand,"Set");
 	SetCommand=function(self)
-		self:settext(steps:GetChartKey())
+		--self:settext(steps:GetChartKey())
 	end,
 	CurrentStepsP1ChangedMessageCommand=cmd(queuecommand,"Set"),
 	RefreshChartInfoMessageCommand=cmd(queuecommand,"Set"),

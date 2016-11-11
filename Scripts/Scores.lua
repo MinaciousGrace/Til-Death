@@ -137,7 +137,7 @@ function getMaxHolds(pn)
 end
 
 function GetPercentDP(score)
-	return 100*getScore(score,1)/getMaxScore(PLAYER_1, 1)
+	return math.floor(10000*getScore(score,1)/getMaxScore(PLAYER_1, 1))/100
 end
 
 --Gets the highest score possible for the scoretype

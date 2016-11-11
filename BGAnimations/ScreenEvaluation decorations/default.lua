@@ -84,8 +84,9 @@ function scoreBoard(pn,position)
 		InitCommand=cmd(xy,frameWidth+frameX,frameY+32;zoom,0.5;halign,1;valign,0;maxwidth,200),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self)
-			local meter = GAMESTATE:GetCurrentSteps(PLAYER_1):GetMeter()
-			self:settext(meter)
+			local meter = (3*GAMESTATE:GetCurrentSteps(PLAYER_1):GetMSD())*getCurRateValue()--/1.092
+			--self:settextf("%05.2f",meter)
+			self:settextf("%5.2f",3*GAMESTATE:GetCurrentSteps(PLAYER_1):GetSSR(0.97)*getCurRateValue())
 			self:diffuse(byDifficultyMeter(meter))
 		end,
 	};
@@ -116,8 +117,9 @@ function scoreBoard(pn,position)
 		InitCommand=cmd(xy,frameX+5,frameY+34;zoom,0.45;halign,0;valign,0),
 		BeginCommand=cmd(queuecommand,"Set"),
 		SetCommand=function(self) 
+			local score = getScoreFromTable(getScoreList(PLAYER_1),pss:GetPersonalHighScoreIndex()+1)
 			self:diffuse(getGradeColor(pss:GetGrade()))
-			self:settextf("%05.2f%% (%s)",pss:GetPercentDancePoints()*100, "DP")
+			self:settextf("%05.2f%% (%s)",GetPercentDP(score), "DP")
 		end,
 	};
 	
